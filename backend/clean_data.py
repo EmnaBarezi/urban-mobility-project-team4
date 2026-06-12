@@ -8,6 +8,10 @@ trips = pd.read_csv(os.path.join(DATA_FOLDER, 'yellow_tripdata_2019-01.csv'))
 zones = pd.read_csv(os.path.join(DATA_FOLDER, 'taxi_zone_lookup.csv'))
 print(f"Trips loaded: {len(trips)} rows")
 
+audit_log = []
+
+# Remove duplicates
+
 # Remove rows where important columns are empty
 trips = trips.dropna(subset=['tpep_pickup_datetime', 'tpep_dropoff_datetime', 'passenger_count', 'trip_distance', 'fare_amount', 'total_amount'])
 print(f"After removing empty rows: {len(trips)} rows")

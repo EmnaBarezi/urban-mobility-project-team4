@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Mobility Data Explorer</title>
+
+    <!-- Fonts --> 
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"> 
+     
+    <!-- Leaflet --> 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> 
+     
+    <!-- Chart.js --> 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+    
+    <!-- Styles --> 
+    <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+    <div class="app-layout"> 
+        <!-- Sidebar --> 
+        <aside class="sidebar"> 
+            <div class="logo"> 
+                <h2>MobilityIQ</h2> 
+                <span>Urban Analytics Platform</span>
+            </div>
+            
+            <nav> 
+                <ul> 
+                    <li class="active">Overview</li>
+                    <li> Mobility Analysis</li> 
+                    <li> Revenue Insights</li> 
+                    <li> Congestion Analysis</li> 
+                    <li> Spatial Analytics</li>
+                </ul>
+            </nav>
+        </aside>
+        
+        <!-- Main Content --> 
+        <main class="main-content"> 
+            <!-- Header --> 
+            <header class="topbar"> 
+                <div> 
+                    <h1>Urban Mobility Intelligence Dashboard</h1> 
+                    <p>New York City Taxi Analytics Platform</p> 
+                </div> 
+                
+                <div class="filters"> 
+                    <select id="boroughFilter">
+                       <option value=""> All Boroughs </option> 
+                    </select>
+
+</body>
+</html>
