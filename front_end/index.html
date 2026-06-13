@@ -38,6 +38,7 @@
         </aside>
        <!-- Main Content --> 
         <main class="main-content"> 
+
             <!-- Header --> 
             <header class="topbar"> 
                 <div> 
@@ -49,6 +50,89 @@
                     <select id="boroughFilter">
                        <option value=""> All Boroughs </option> 
                     </select>
+                    <input type="date" id="startDate"> 
+                    <input type="date" id="endDate"> 
+                    <button> Apply Filters </button> 
+                </div> 
+            </header> 
+            
+            <!-- KPI Section -->
+            <section class="metrics-grid"> 
+                <div class="metric-card"> 
+                    <span class="metric-title"> Total Trips </span> 
+                    <h2 id="totalTrips"> 0 </h2> 
+                    <p> Trips Processed </p> 
+                </div> 
+                
+                <div class="metric-card"> 
+                    <span class="metric-title"> Average Fare </span>
+                    <h2 id="avgFare"> $0 </h2> 
+                    <p> Per Trip </p> 
+                </div> 
+                
+                <div class="metric-card"> 
+                    <span class="metric-title"> Average Distance </span> 
+                    <h2 id="avgDistance"> 0 </h2> 
+                    <p> Miles </p>
+                </div>
+                
+                <div class="metric-card"> 
+                    <span class="metric-title"> Average Speed </span>
+                    <h2 id="avgSpeed"> 0 </h2> 
+                    <p> MPH </p> 
+                </div> 
+            </section> 
+            
+            <!-- Charts Row 1 --> 
+            <section class="dashboard-grid"> 
+                <div class="panel"> 
+                    <div class="panel-header"> 
+                        <h3> Hourly Demand Distribution </h3>
+                    </div>
+                    <canvas id="hourlyTripsChart"></canvas> 
+                </div> 
+                
+                <div class="panel"> 
+                    <div class="panel-header"> 
+                        <h3> Revenue by Borough </h3> 
+                    </div> 
+                    <canvas id="revenueChart"></canvas> 
+                </div> 
+            </section> 
+            
+            <!-- Map Section --> 
+            <section class="panel map-panel">
+                <div class="panel-header"> 
+                    <h3> Spatial Mobility Analysis </h3> 
+                </div> 
+                
+                <div id="map"></div> 
+            </section> 
+            
+            <!-- Charts Row 2 --> 
+            <section class="dashboard-grid"> 
+                <div class="panel"> 
+                    <div class="panel-header"> 
+                        <h3> Average Speed by Hour </h3>
+                    </div>
+                    <canvas id="speedChart"></canvas> 
+                </div> 
+
+                <div class="panel"> 
+                    <div class="panel-header"> 
+                        <h3> Top Mobility Corridors </h3> 
+                    </div> 
+                    <canvas id="routesChart"></canvas> 
+                </div> 
+            </section> 
+            
+            <!-- Insights Panel --> 
+            <section class="panel insights-panel">
+
+
+
+
+
 
 </body>
 </html>
