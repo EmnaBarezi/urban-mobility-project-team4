@@ -1,0 +1,7 @@
+Starting rows: 7667792
+Removed 0 duplicate rows. Remaining: 7667792
+Removed 0 rows with missing values. Remaining: 7667792
+Removed 176965 rows with invalid distance, fare or passenger count. Remaining: 7490827
+Removed 508 rows outside January 2019. Remaining: 7490319
+Removed 26083 rows with impossible duration or speed. Remaining: 7464236
+Final clean dataset: 7464236 rows
