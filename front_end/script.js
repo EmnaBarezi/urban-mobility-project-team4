@@ -99,9 +99,9 @@ async function loadHourlyChart() {
                     pointRadius: 0,
                     borderWidth: 2
                 }]
-            }
-        },
-        options: chartOptions("line")
+            },
+            options: chartOptions("line")
+        }
     );
 
 } 
@@ -130,72 +130,63 @@ async function loadRevenueChart() {
             options: chartOptions("bar")
         }
     );
-
-    } catch (err) {
-        console.error("Failed to load revenue chart:", err);
-    }
 }
 
 // ======================
-// SPEED CHART
+// Speed by hour chart
 // ======================
 
 async function loadSpeedChart() {
-    try {
-        const res = await fetch(`${API_BASE}/speed-by-hour`);
-        const data = await res.json();
+    const data = await apiGet("/speed-by-hour");
+    destroyChart("speed");
 
-        new Chart(
-            document.getElementById("speedChart"),
-            {
-                type: "line",
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: "Speed",
-                        data: data.data,
-                        borderColor: "#06b6d4",
-                        backgroundColor: "rgba(6, 182, 212, 0.15)",
-                        fill: true,
-                        tension: 0.3
-                    }]
-                }
-            }
-        );
-
-    } catch (err) {
-        console.error("Failed to load speed chart:", err);
-    }
+    charts.speed = new Chart(
+        document.getElementById("speedChart"),
+        {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Speed (mph) ",
+                    data: data.data,
+                    borderColor: "#9B8CFF",
+                    backgroundColor: "rgba(155, 140, 255, 0.12)",
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
+            },            
+            options: chartOptions("line")
+        }
+    );
 }
 
 // ======================
-// ROUTES CHART
+// Top routes chart
 // ======================
 
 async function loadRoutesChart() {
-    try {
-        const res = await fetch(`${API_BASE}/top-routes`);
-        const data = await res.json();
+    const data = await apiGet("/top-routes");
+    destroyChart("routes");
 
-        new Chart(
-            document.getElementById("routesChart"),
-            {
-                type: "bar",
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: "Trips",
-                        data: data.data,
-                        backgroundColor: "#8b5cf6"
-                    }]
-                }
-            }
-        );
-
-    } catch (err) {
-        console.error("Failed to load routes chart:", err);
-    }
-}
+    charts.routes = new Chart(
+        document.getElementById("routesChart"),
+        {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Trips",
+                    data: data.data,
+                    backgroundColor: "#F2684B",
+                    borderRadius: 4
+                }]
+            },
+            options: { ...chartOptions("bar"), indexAxis: "y" }
+        }
+    );
+} 
 
 // ======================
 // MAP
