@@ -3,152 +3,177 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Urban Mobility Data Explorer</title>
+    <title>MobilityIQ — Urban Mobility Dashboard</title>
 
-    <!-- Fonts --> 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"> 
-     
-    <!-- Leaflet --> 
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> 
-     
-    <!-- Chart.js --> 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
-    
-    <!-- Styles --> 
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Styles -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="app-layout"> 
-        <!-- Sidebar --> 
-        <aside class="sidebar"> 
-            <div class="logo"> 
-                <h2>MobilityIQ</h2> 
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>MobilityIQ</h2>
                 <span>Urban Analytics Platform</span>
             </div>
-            
-            <nav> 
-                <ul> 
+
+            <nav>
+                <ul>
                     <li class="active">Overview</li>
-                    <li> Mobility Analysis</li> 
-                    <li> Revenue Insights</li> 
-                    <li> Congestion Analysis</li> 
-                    <li> Spatial Analytics</li>
+                    <li>Mobility Analysis</li>
+                    <li>Revenue Insights</li>
+                    <li>Congestion Analysis</li>
+                    <li>Spatial Analytics</li>
                 </ul>
             </nav>
+
+            <!-- NEW: live API connection indicator, filled in by script.js -->
+            <div class="sidebar-footer">
+                <span id="dbStatus" class="status-dot"></span>
+                <span id="dbStatusText">Connecting…</span>
+            </div>
         </aside>
-       <!-- Main Content --> 
-        <main class="main-content"> 
 
-            <!-- Header --> 
-            <header class="topbar"> 
-                <div> 
-                    <h1>Urban Mobility Intelligence Dashboard</h1> 
-                    <p>New York City Taxi Analytics Platform</p> 
-                </div> 
-                
-                <div class="filters"> 
-                    <select id="boroughFilter">
-                       <option value=""> All Boroughs </option> 
-                    </select>
-                    <input type="date" id="startDate"> 
-                    <input type="date" id="endDate"> 
-                    <button> Apply Filters </button> 
-                </div> 
-            </header> 
-            
-            <!-- KPI Section -->
-            <section class="metrics-grid"> 
-                <div class="metric-card"> 
-                    <span class="metric-title"> Total Trips </span> 
-                    <h2 id="totalTrips"> 0 </h2> 
-                    <p> Trips Processed </p> 
-                </div> 
-                
-                <div class="metric-card"> 
-                    <span class="metric-title"> Average Fare </span>
-                    <h2 id="avgFare"> $0 </h2> 
-                    <p> Per Trip </p> 
-                </div> 
-                
-                <div class="metric-card"> 
-                    <span class="metric-title"> Average Distance </span> 
-                    <h2 id="avgDistance"> 0 </h2> 
-                    <p> Miles </p>
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Header -->
+            <header class="topbar">
+                <div>
+                    <h1>Urban Mobility Intelligence Dashboard</h1>
+                    <p>New York City Taxi Analytics Platform — January 2019</p>
                 </div>
-                
-                <div class="metric-card"> 
-                    <span class="metric-title"> Average Speed </span>
-                    <h2 id="avgSpeed"> 0 </h2> 
-                    <p> MPH </p> 
-                </div> 
-            </section> 
-            
-            <!-- Charts Row 1 --> 
-            <section class="dashboard-grid"> 
-                <div class="panel"> 
-                    <div class="panel-header"> 
-                        <h3> Hourly Demand Distribution </h3>
+
+                <div class="filters">
+                    <select id="boroughFilter">
+                        <option value="">All Boroughs</option>
+                    </select>
+                    <label for="startDate">From</label>
+                    <input type="date" id="startDate" min="2019-01-01" max="2019-01-31">
+                    <label for="endDate">To</label>
+                    <input type="date" id="endDate" min="2019-01-01" max="2019-01-31">
+                    <button id="applyFilters">Apply Filters</button>
+                </div>
+            </header>
+
+            <!-- NEW: shown while fetching, or on API error -->
+            <div id="loadingBanner" class="loading-banner hidden">Loading data…</div>
+
+            <!-- KPI Section -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <span class="metric-title">Total Trips</span>
+                    <h2 id="totalTrips">0</h2>
+                    <p>Trips Processed</p>
+                </div>
+
+                <div class="metric-card">
+                    <span class="metric-title">Average Fare</span>
+                    <h2 id="avgFare">$0</h2>
+                    <p>Per Trip</p>
+                </div>
+
+                <div class="metric-card">
+                    <span class="metric-title">Average Distance</span>
+                    <h2 id="avgDistance">0</h2>
+                    <p>Miles</p>
+                </div>
+
+                <div class="metric-card">
+                    <span class="metric-title">Average Speed</span>
+                    <h2 id="avgSpeed">0</h2>
+                    <p>MPH</p>
+                </div>
+            </section>
+
+            <!-- Charts Row 1 -->
+            <section class="dashboard-grid">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Hourly Demand Distribution</h3>
+                        <span class="panel-sub">Trips per hour of day</span>
                     </div>
-                    <canvas id="hourlyTripsChart"></canvas> 
-                </div> 
-                
-                <div class="panel"> 
-                    <div class="panel-header"> 
-                        <h3> Revenue by Borough </h3> 
-                    </div> 
-                    <canvas id="revenueChart"></canvas> 
-                </div> 
-            </section> 
-            
-            <!-- Map Section --> 
+                    <canvas id="hourlyTripsChart"></canvas>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Revenue by Borough</h3>
+                        <span class="panel-sub">Total fare revenue ($)</span>
+                    </div>
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Map Section -->
             <section class="panel map-panel">
-                <div class="panel-header"> 
-                    <h3> Spatial Mobility Analysis </h3> 
-                </div> 
-                
-                <div id="map"></div> 
-            </section> 
-            
-            <!-- Charts Row 2 --> 
-            <section class="dashboard-grid"> 
-                <div class="panel"> 
-                    <div class="panel-header"> 
-                        <h3> Average Speed by Hour </h3>
+                <div class="panel-header">
+                    <h3>Spatial Mobility Analysis</h3>
+                    <span class="panel-sub">Pickup density by taxi zone — darker = more trips</span>
+                </div>
+                <div id="map"></div>
+            </section>
+
+            <!-- Charts Row 2 -->
+            <section class="dashboard-grid">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Average Speed by Hour</h3>
+                        <span class="panel-sub">mph — lower = more congestion</span>
                     </div>
-                    <canvas id="speedChart"></canvas> 
-                </div> 
+                    <canvas id="speedChart"></canvas>
+                </div>
 
-                <div class="panel"> 
-                    <div class="panel-header"> 
-                        <h3> Top Mobility Corridors </h3> 
-                    </div> 
-                    <canvas id="routesChart"></canvas> 
-                </div> 
-            </section> 
-            
-            <!-- Insights Panel --> 
+                <div class="panel">
+                    <div class="panel-header">
+                        <h3>Top Mobility Routes</h3>
+                        <span class="panel-sub">Busiest pickup → dropoff borough pairs</span>
+                    </div>
+                    <canvas id="routesChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Insights Panel -->
             <section class="panel insights-panel">
-                <div class="panel-header"> 
-                    <h3> Key Findings </h3> 
-                </div> 
+                <div class="panel-header">
+                    <h3>Key Findings</h3>
+                </div>
 
-                <div id="insights"> 
-                    <ul> 
-                        <li> Peak taxi demand occurs during commuter hours. </li> 
-                        <li> Manhattan generates the largest share of revenue. </li> 
-                        <li> Average vehicle speed decreases significantly during peak traffic periods. </li>
-                    </ul>
+                <div class="insights-grid">
+                    <div class="insight-card">
+                        <div class="insight-icon">&#8599;</div>
+                        <h4>Peak Demand Hours</h4>
+                        <p>Peak taxi demand occurs during commuter hours, with sharp spikes in the morning and evening rush.</p>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-icon">$</div>
+                        <h4>Manhattan Revenue Share</h4>
+                        <p>Manhattan generates the largest share of total revenue, driven by trip density and fare structure.</p>
+                    </div>
+                    <div class="insight-card">
+                        <div class="insight-icon">&#8595;</div>
+                        <h4>Midday Congestion</h4>
+                        <p>Average vehicle speed decreases significantly during peak traffic periods, especially midday.</p>
+                    </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- Leaflet --> 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> 
-     
-     <!-- Application Scripts --> 
-    <script src="script.js"></script> 
+    <!-- Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
+    <!-- Application Scripts -->
+    <script src="script.js"></script>
 </body>
 
 </html>
