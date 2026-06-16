@@ -2,6 +2,13 @@
 
 const API_BASE = "http://127.0.0.1:5000/api";
 
+
+const charts = {};
+
+let map = null;
+let geojsonLayer = null;
+let geojsonCache = null; 
+
 // ------------------------------------------------------------
 // Helpers
 // ------------------------------------------------------------
@@ -13,7 +20,7 @@ function destroyChart(key) {
     }
 }
 
-// Builds ?borough=&start=&end= from the current filter controls
+// Builds borough [start-end] from the current filter controls
 function filterQuery(extra = {}) {
     const params = new URLSearchParams();
     const borough = document.getElementById("boroughFilter").value;
@@ -46,87 +53,83 @@ function showBanner(message, isError = false) {
 function hideBanner() {
     document.getElementById("loadingBanner").classList.add("hidden");
 }
+
 // ======================
-// KPI CARDS
+// KPI Cards
 // ======================
 
 async function loadKPIs() {
-    try {
-        const res = await fetch(`${API_BASE}/kpis`);
-        const data = await res.json();
+    const data = await apiGet("/kpis");
 
-        document.getElementById("totalTrips").textContent =
-            data.totalTrips.toLocaleString();
+    document.getElementById("totalTrips").textContent =
+        data.totalTrips.toLocaleString();
 
-        document.getElementById("avgFare").textContent =
-            "$" + data.avgFare.toFixed(2);
+    document.getElementById("avgFare").textContent =
+        "$" + data.avgFare.toFixed(2);
 
-        document.getElementById("avgDistance").textContent =
-            data.avgDistance.toFixed(1);
+    document.getElementById("avgDistance").textContent =
+        data.avgDistance.toFixed(1);
 
-        document.getElementById("avgSpeed").textContent =
-            data.avgSpeed.toFixed(1);
+    document.getElementById("avgSpeed").textContent =
+        data.avgSpeed.toFixed(1);
 
-    } catch (err) {
-        console.error("Failed to load KPIs:", err);
-    }
-}
-
+} 
+    
 // ======================
-// HOURLY DEMAND CHART
+// Hourly demand chart
 // ======================
 
 async function loadHourlyChart() {
-    try {
-        const res = await fetch(`${API_BASE}/hourly-demand`);
-        const data = await res.json();
+    const data = await apiGet("/hourly-demand");
+    destroyChart("hourly");
 
-        new Chart(
-            document.getElementById("hourlyTripsChart"),
-            {
-                type: "line",
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: "Trips",
-                        data: data.data,
-                        borderColor: "#2563eb",
-                        backgroundColor: "rgba(37, 99, 235, 0.15)",
-                        fill: true,
-                        tension: 0.3
-                    }]
-                }
+    charts.hourly = new Chart(
+        document.getElementById("hourlyTripsChart"),
+        {
+            type: "line",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Trips",
+                    data: data.data,
+                    borderColor: "#3DD6C4",
+                    backgroundColor: "rgba(61, 214, 196, 0.12)",
+                    fill: true,
+                    tension: 0.35,
+                    pointRadius: 0,
+                    borderWidth: 2
+                }]
             }
-        );
+        },
+        options: chartOptions("line")
+    );
 
-    } catch (err) {
-        console.error("Failed to load hourly demand chart:", err);
-    }
-}
+} 
 
-// ======================
-// REVENUE CHART
-// ======================
+// ============================
+// Revenue by Borough chart
+// ============================
 
 async function loadRevenueChart() {
-    try {
-        const res = await fetch(`${API_BASE}/revenue-by-borough`);
-        const data = await res.json();
+    const data = await apiGet("/revenue-by-borough");
+    destroyChart("revenue");
 
-        new Chart(
-            document.getElementById("revenueChart"),
-            {
-                type: "bar",
-                data: {
-                    labels: data.labels,
-                    datasets: [{
-                        label: "Revenue",
-                        data: data.data,
-                        backgroundColor: "#2563eb"
-                    }]
-                }
-            }
-        );
+    charts.revenue = new Chart(
+        document.getElementById("revenueChart"),
+        {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: "Revenue",
+                    data: data.data,
+                    backgroundColor: "#F5c518",
+                    borderRadius: 4
+                }]
+            },
+            options: chartOptions("bar")
+        }
+    );
 
     } catch (err) {
         console.error("Failed to load revenue chart:", err);
