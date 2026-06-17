@@ -188,48 +188,193 @@ async function loadRoutesChart() {
     );
 } 
 
-// ======================
-// MAP
-// ======================
+// ---------------------
+// Chart.js theme
+// ---------------------
 
-const map = L.map("map").setView(
-    [40.7128, -74.0060],
-    11
-);
+function chartOptions(type) {
+    const gridColor = "#232938";
+    const textColor = "#8890A2";
 
-L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        maxZoom: 19
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: "#171C26",
+                borderColor: "#2E3648",
+                borderWidth: 1,
+                titleColor: "#E8EAED",
+                bodyColor: "#E8EAED",
+                padding: 10
+            }
+        },
+        scales: {
+            x: {
+                grid: { color: type === "bar" && document.body ? "transparent" : gridColor, display: false },
+                ticks: { color: textColor, font: { size: 11 } }
+            },
+            y: {
+                grid: { color: gridColor },
+                ticks: { color: textColor, font: { size: 11 } },
+                beginAtZero: true
+            }
+        }
+    };
+}
+
+// -------------------------------
+// Borough filter dropdown 
+// ------------------------------
+
+async function loadBoroughOptions() {
+    try {
+        const boroughs = await apiGet("/boroughs");
+        const select = document.getElementById("boroughFilter");
+        boroughs.forEach(b => {
+            const opt = document.createElement("option");
+            opt.value = b;
+            opt.textContent = b;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error("Failed to load borough list:", err);
     }
-).addTo(map);
+}
 
-L.marker(
-    [40.7580, -73.9855]
-)
-.addTo(map)
-.bindPopup("Times Square");
+// -------------------------------
+// Map; taxi zone boundaries
+// -------------------------------
 
-// ======================
-// LOAD EVERYTHING ON PAGE LOAD
-// ======================
+function initMap() {
+    map = L.map("map").setView([40.7128, -74.0060], 11);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap contributors"
+    }).addTo(map);
+}
 
-loadKPIs();
-loadHourlyChart();
-loadRevenueChart();
-loadSpeedChart();
-loadRoutesChart();
+function zoneColor(count, max) {
+    if (!max || !count) return "#1A2030";
+    const ratio = count / max;
+    if (ratio > 0.8) return "#F5C518";
+    if (ratio > 0.6) return "#D9AE17";
+    if (ratio > 0.4) return "#3DD6C4";
+    if (ratio > 0.2) return "#2BA396";
+    return "#1A2030";
+}
 
-// ======================
-// APPLY FILTERS BUTTON
-// (currently just reloads all charts — filtering by
-//  borough/date isn't wired into the API yet)
-// ======================
+async function loadMap() {
+    const zoneStats = await apiGet("/zone-stats");
 
-document.querySelector(".filters button").addEventListener("click", () => {
-    loadKPIs();
-    loadHourlyChart();
-    loadRevenueChart();
-    loadSpeedChart();
-    loadRoutesChart();
+    if (!geojsonCache) {
+        try {
+            geojsonCache = await apiGet("/taxi-zones-geojson");
+        } catch (err) {
+            console.error("Could not load taxi zone boundaries:", err);
+            return;
+        }
+    }
+
+    if (geojsonLayer) {
+        map.removeLayer(geojsonLayer);
+        geojsonLayer = null;
+    }
+
+    const lookup = {};
+    let max = 0;
+    zoneStats.forEach(z => {
+        lookup[z.locationId] = z.tripCount;
+        if (z.tripCount > max) max = z.tripCount;
+    });
+
+    geojsonLayer = L.geoJSON(geojsonCache, {
+        style: feature => ({
+            fillColor: zoneColor(lookup[feature.properties.LocationID], max),
+            fillOpacity: 0.75,
+            color: "#0B0E14",
+            weight: 0.6
+        }),
+        onEachFeature: (feature, layer) => {
+            const id = feature.properties.LocationID;
+            const name = feature.properties.zone || "Unknown zone";
+            const count = lookup[id] || 0;
+            layer.bindPopup(
+                `<strong>${name}</strong><br>Pickups: ${count.toLocaleString()}`
+            );
+        }
+    }).addTo(map);
+}
+
+// ------------------------------------------------------------
+// Connection status indicator (sidebar footer)
+// ------------------------------------------------------------
+
+async function checkHealth() {
+    const dot = document.getElementById("dbStatus");
+    const text = document.getElementById("dbStatusText");
+    try {
+        const res = await fetch(API_BASE + "/kpis");
+        if (res.ok) {
+            dot.className = "status-dot ok";
+            text.textContent = "API connected";
+            return true;
+        }
+        throw new Error("Bad response");
+    } catch {
+        dot.className = "status-dot error";
+        text.textContent = "API offline";
+        return false;
+    }
+}
+
+// -----------------------------------
+// Load everything on page load
+// -----------------------------------
+
+async function loadDashboard() {
+    showBanner("Loading data…");
+
+    const ok = await checkHealth();
+    if (!ok) {
+        showBanner("Cannot reach the API. Run: python backend/app.py", true);
+        return;
+    }
+
+    try {
+        await Promise.all([
+            loadKPIs(),
+            loadHourlyChart(),
+            loadRevenueChart(),
+            loadSpeedChart(),
+            loadRoutesChart(),
+            loadMap()
+        ]);
+        hideBanner();
+    } catch (err) {
+        console.error("Dashboard load error:", err);
+        showBanner("Something went wrong loading the dashboard. Check the console.", true);
+    }
+}
+
+// --------------------------------------
+// Sidebar nav; active-state toggle
+// --------------------------------------
+
+document.querySelectorAll(".sidebar li").forEach(li => {
+    li.addEventListener("click", () => {
+        document.querySelectorAll(".sidebar li").forEach(x => x.classList.remove("active"));
+        li.classList.add("active");
+    });
 });
+
+// -----------------------------
+// Filter button
+// -----------------------------
+
+document.getElementById("applyFilters").addEventListener("click", loadDashboard);
+
+initMap();
+loadBoroughOptions();
+loadDashboard();
