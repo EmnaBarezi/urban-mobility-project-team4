@@ -1,8 +1,11 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import sqlite3
 import os
+import json
 
 app = Flask(__name__)
+CORS(app)
 
 DATA_FOLDER = os.path.join(os.path.dirname(__file__), '..', 'data')
 DB_PATH = os.path.join(DATA_FOLDER, 'mobility.db')
@@ -12,29 +15,47 @@ def get_connection():
     conn = sqlite3.connect(DB_PATH)
     return conn
 
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+# Shared helper: reads borough from the URL and turns them into a SQL WHERE clause + params list. 
+# ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+def build_filters():
+    borough = request.args.get('borough')
+    start = request.args.get('start')  
+    end = request.args.get('end')
+
+    clauses = []
+    params = []
+
+    if borough:
+        clauses.append("pickup_borough = ?")
+        params.append(borough)
+    if start:
+        clauses.append("pickup_datetime >= ?")
+        params.append(start)
+    if end:
+        clauses.append("pickup_datetime <= ?")
+        params.append(end + " 23:59:59")
+
+    where_sql = ("WHERE " + " AND ".join(clauses)) if clauses else ""
+    return where_sql, params
+
 # Endpoint 1: KPI numbers for the top cards
 @app.route('/api/kpis')
 def get_kpis():
+    where_sql, params = build_filters()
     conn = get_connection()
     cursor = conn.cursor()
-    cursor.execute('''
+    cursor.execute(f'''
         SELECT
             COUNT(*),
             AVG(fare_amount),
             AVG(trip_distance),
             AVG(speed_mph)
         FROM trips
-    ''')
+        {where_sql}
+    ''', params)
     row = cursor.fetchone()
     conn.close()
-
-    result = {
-        'totalTrips': row[0],
-        'avgFare': round(row[1], 2),
-        'avgDistance': round(row[2], 2),
-        'avgSpeed': round(row[3], 2)
-    }
-    return jsonify(result)
 
 # Endpoint 2: number of trips for each hour of the day
 @app.route('/api/hourly-demand')
