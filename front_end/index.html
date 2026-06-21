@@ -50,7 +50,7 @@
             <header class="topbar">
                 <div>
                     <h1>Urban Mobility Intelligence Dashboard</h1>
-                    <p>New York City Taxi Analytics Platform — January 2019</p>
+                    <p>New York City Taxi Analytics Platform</p>
                 </div>
 
                 <div class="filters">
@@ -98,15 +98,19 @@
             </section>
 
             <!-- Charts Row 1 -->
-            <section class="dashboard-grid">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h3>Hourly Demand Distribution</h3>
-                        <span class="panel-sub">Trips per hour of day</span>
+            <section id="section-mobility" class="section-block">
+                <div class="section-label">Mobility Analysis</div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Hourly Demand Distribution</h3>
+                            <span class="panel-sub">Trips per hour of day</span>
+                        </div>
+                        <canvas id="hourlyTripsChart"></canvas>
                     </div>
-                    <canvas id="hourlyTripsChart"></canvas>
-                </div>
+            </section>
 
+            <section id="section-revenue" class="section-block">
+                <div class="section-label">Revenue Insights</div>
                 <div class="panel">
                     <div class="panel-header">
                         <h3>Revenue by Borough</h3>
@@ -116,13 +120,39 @@
                 </div>
             </section>
 
-            <!-- Map Section -->
-            <section class="panel map-panel">
-                <div class="panel-header">
-                    <h3>Spatial Mobility Analysis</h3>
-                    <span class="panel-sub">Pickup density by taxi zone — darker = more trips</span>
+            <section id="section-congestion" class="section-block">
+                <div class="section-label">Congestion Analysis</div>
+                <div class="dashboard-grid">
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Average Speed by Hour</h3>
+                            <span class="panel-sub">mph — lower = more congestion</span>
+                        </div>
+                        <canvas id="speedChart"></canvas>
+                    </div>
+                    <div class="panel">
+                        <div class="panel-header">
+                            <h3>Top Mobility Routes</h3>
+                            <span class="panel-sub">Busiest pickup → dropoff borough pairs</span>
+                        </div>
+                        <canvas id="routesChart"></canvas>
+                    </div>
                 </div>
-                <div id="map"></div>
+            </section>
+
+            <!-- Map Section -->
+            <section id="section-spatial" class="section-block">
+                <div class="section-label">Spatial Analytics</div>
+                <div class="panel map-panel">
+                    <div class="panel-header">
+                        <h3>Spatial Mobility Analysis</h3>
+                        <span class="panel-sub">Pickup density by taxi zone — darker = more trips</span>
+                    </div>
+                    <div class="map-wrapper">
+                        <div id="map"></div>
+                        <div class="map-drag-hint">Click the map to enable panning</div>
+                    </div>
+                </div>    
             </section>
 
             <!-- Charts Row 2 -->
@@ -145,12 +175,10 @@
             </section>
 
             <!-- Insights Panel -->
-            <section class="panel insights-panel">
+            <section class="section-block panel insights-panel">
                 <div class="panel-header">
                     <h3>Key Findings</h3>
                 </div>
-
-          
                 <div class="insights-grid">
                     <div class="insight-card">
                         <div class="insight-icon">&#8599;</div>
