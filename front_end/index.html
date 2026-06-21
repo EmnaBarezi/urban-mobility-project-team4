@@ -19,6 +19,7 @@
 </head>
 <body>
     <div class="app-layout">
+
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
@@ -28,15 +29,14 @@
 
             <nav>
                 <ul>
-                    <li class="active">Overview</li>
-                    <li>Mobility Analysis</li>
-                    <li>Revenue Insights</li>
-                    <li>Congestion Analysis</li>
-                    <li>Spatial Analytics</li>
+                    <li class="active" data-target="section-overview">Overview</li>
+                    <li data-target="section-mobility">Mobility Analysis</li>
+                    <li data-target="section-revenue">Revenue Insights</li>
+                    <li data-target="section-congestion">Congestion Analysis</li>
+                    <li data-target="section-spatial">Spatial Analytics</li>
                 </ul>
             </nav>
 
-            <!-- NEW: live API connection indicator, filled in by script.js -->
             <div class="sidebar-footer">
                 <span id="dbStatus" class="status-dot"></span>
                 <span id="dbStatusText">Connecting…</span>
@@ -65,34 +65,36 @@
                 </div>
             </header>
 
-            <!-- NEW: shown while fetching, or on API error -->
             <div id="loadingBanner" class="loading-banner hidden">Loading data…</div>
 
             <!-- KPI Section -->
-            <section class="metrics-grid">
-                <div class="metric-card">
-                    <span class="metric-title">Total Trips</span>
-                    <h2 id="totalTrips">0</h2>
-                    <p>Trips Processed</p>
-                </div>
+            <section id="section-overview" class="section-block">
+                <div class="section-label">Overview</div>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <span class="metric-title">Total Trips</span>
+                        <h2 id="totalTrips">0</h2>
+                        <p>Trips Processed</p>
+                    </div>
 
-                <div class="metric-card">
-                    <span class="metric-title">Average Fare</span>
-                    <h2 id="avgFare">$0</h2>
-                    <p>Per Trip</p>
-                </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Average Fare</span>
+                        <h2 id="avgFare">$0</h2>
+                        <p>Per Trip</p>
+                    </div>
 
-                <div class="metric-card">
-                    <span class="metric-title">Average Distance</span>
-                    <h2 id="avgDistance">0</h2>
-                    <p>Miles</p>
-                </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Average Distance</span>
+                        <h2 id="avgDistance">0</h2>
+                        <p>Miles</p>
+                    </div>
 
-                <div class="metric-card">
-                    <span class="metric-title">Average Speed</span>
-                    <h2 id="avgSpeed">0</h2>
-                    <p>MPH</p>
-                </div>
+                    <div class="metric-card">
+                        <span class="metric-title">Average Speed</span>
+                        <h2 id="avgSpeed">0</h2>
+                        <p>MPH</p>
+                    </div>
+                </div>    
             </section>
 
             <!-- Charts Row 1 -->
