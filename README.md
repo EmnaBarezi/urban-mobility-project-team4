@@ -1,4 +1,3 @@
-````markdown
 # MobilityIQ: Urban Mobility Intelligence Platform
 
 ## Project Overview
@@ -9,7 +8,6 @@ The system processes raw taxi trip records, cleans and enriches the data, stores
 
 ---
 
-
 ### Project Name
 Urban Mobility Team 4
 
@@ -17,12 +15,18 @@ Urban Mobility Team 4
 
 | Name | Role |
 |--------|--------|
-| Emna Barezi| Backend Development |
-|Moreen Muthoni| Frontend Development |
+| Emna Barezi | Backend Development |
+| Moreen Muthoni | Frontend Development |
 
 ---
-## Project Structure
 
+## Important Note
+
+The API server must be running before opening the dashboard. Keep the terminal open while using the app.
+
+---
+
+## Project Structure
 urban-mobility-project-team4/
 
 ├── backend/
@@ -65,17 +69,15 @@ urban-mobility-project-team4/
 - A web browser (Chrome recommended)
 
 ### 2. Install Python libraries
-
-Open a terminal in the project folder and run:
 python -m pip install flask flask-cors pandas geopandas
 
 ### 3. Download the dataset
 
 The dataset files are too large for GitHub, so they must be downloaded manually:
 
-1. Download `yellow_tripdata_2019-01.csv` from the NYC TLC website (link provided in the assignment)
-2. Download `taxi_zone_lookup.csv` (provided in the assignment)
-3. Download `taxi_zones.zip` (provided in the assignment)
+1. Download `yellow_tripdata_2019-01.csv` from the NYC TLC website
+2. Download `taxi_zone_lookup.csv`
+3. Download `taxi_zones.zip`
 4. Place all 3 files inside the `data/` folder
 
 ### 4. Run the backend setup (in order)
@@ -94,14 +96,14 @@ python backend/app.py
 
 The server will start at `http://127.0.0.1:5000`
 
+**Keep this terminal open while using the dashboard.**
+
 ### 6. Open the dashboard
 
-Open the file `front_end/index.html` directly in your web browser (double click it, or right click and choose "Open with" your browser).
-
-The dashboard will automatically connect to the API and load real data.
+Open `front_end/index.html` in your browser. The dashboard will automatically connect to the API and load real data.
 
 ---
 
 ## Video Walkthrough
 
-
+[link to be added]
