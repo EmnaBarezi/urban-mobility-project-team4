@@ -106,4 +106,4 @@ Open `front_end/index.html` in your browser. The dashboard will automatically co
 
 ## Video Walkthrough
 
-[link to be added]
+https://drive.google.com/file/d/1xqB1v7qRAvzoDWKuqkw5wAvMVLvmVUjx/view?usp=sharing
