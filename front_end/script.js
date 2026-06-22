@@ -2,12 +2,43 @@
 
 const API_BASE = "http://127.0.0.1:5000/api";
 
-
 const charts = {};
-
 let map = null;
 let geojsonLayer = null;
 let geojsonCache = null; 
+
+// ------------------------------
+// Side bar navigation
+// ------------------------------
+
+document.querySelectorAll(".sidebar li[data-target]").forEach(li => {
+    li.addEventListener("click", () => {
+        document.querySelectorAll(".sidebar li").forEach(x => x.classList.remove("active"));
+        li.classList.add("active");
+        const targetId = li.getAttribute("data-target");
+        const target = document.getElementById(targetId);
+        if (!target) return;
+        const main = document.querySelector(".main-content");
+        const targetTop = target.offsetTop - 24; 
+        main.scrollTo({ top: targetTop, behavior: "smooth" });
+    });
+});
+
+const allSections = document.querySelectorAll("section[id]");
+const main = document.querySelector(".main-content");
+
+main.addEventListener("scroll", () => {
+    let currentId = "";
+    allSections.forEach(section => {
+        if (section.offsetTop - main.scrollTop <= 120) {
+            currentId = section.id;
+        }
+    });
+    if (!currentId) return;
+    document.querySelectorAll(".sidebar li[data-target]").forEach(li => {
+        li.classList.toggle("active", li.getAttribute("data-target") === currentId);
+    });
+});
 
 // ------------------------------------------------------------
 // Helpers
@@ -20,7 +51,6 @@ function destroyChart(key) {
     }
 }
 
-// Builds borough [start-end] from the current filter controls
 function filterQuery(extra = {}) {
     const params = new URLSearchParams();
     const borough = document.getElementById("boroughFilter").value;
@@ -76,8 +106,40 @@ async function loadKPIs() {
 } 
     
 // ======================
-// Hourly demand chart
+//Charts
 // ======================
+
+function chartOptions(type) {
+    const gridColor = "#232938";
+    const textColor = "#8890A2";
+
+    return {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                backgroundColor: "#171C26",
+                borderColor: "#2E3648",
+                borderWidth: 1,
+                titleColor: "#E8EAED",
+                bodyColor: "#E8EAED",
+                padding: 10
+            }
+        },
+        scales: {
+            x: {
+                grid: { cdisplay: false },
+                ticks: { color: textColor, font: { size: 11 } }
+            },
+            y: {
+                grid: { color: gridColor },
+                ticks: { color: textColor, font: { size: 11 } },
+                beginAtZero: true
+            }
+        }
+    };
+}
 
 async function loadHourlyChart() {
     const data = await apiGet("/hourly-demand");
@@ -106,10 +168,6 @@ async function loadHourlyChart() {
 
 } 
 
-// ============================
-// Revenue by Borough chart
-// ============================
-
 async function loadRevenueChart() {
     const data = await apiGet("/revenue-by-borough");
     destroyChart("revenue");
@@ -131,10 +189,6 @@ async function loadRevenueChart() {
         }
     );
 }
-
-// ======================
-// Speed by hour chart
-// ======================
 
 async function loadSpeedChart() {
     const data = await apiGet("/speed-by-hour");
@@ -162,10 +216,6 @@ async function loadSpeedChart() {
     );
 }
 
-// ======================
-// Top routes chart
-// ======================
-
 async function loadRoutesChart() {
     const data = await apiGet("/top-routes");
     destroyChart("routes");
@@ -187,42 +237,6 @@ async function loadRoutesChart() {
         }
     );
 } 
-
-// ---------------------
-// Chart.js theme
-// ---------------------
-
-function chartOptions(type) {
-    const gridColor = "#232938";
-    const textColor = "#8890A2";
-
-    return {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: { display: false },
-            tooltip: {
-                backgroundColor: "#171C26",
-                borderColor: "#2E3648",
-                borderWidth: 1,
-                titleColor: "#E8EAED",
-                bodyColor: "#E8EAED",
-                padding: 10
-            }
-        },
-        scales: {
-            x: {
-                grid: { color: type === "bar" && document.body ? "transparent" : gridColor, display: false },
-                ticks: { color: textColor, font: { size: 11 } }
-            },
-            y: {
-                grid: { color: gridColor },
-                ticks: { color: textColor, font: { size: 11 } },
-                beginAtZero: true
-            }
-        }
-    };
-}
 
 // -------------------------------
 // Borough filter dropdown 
@@ -248,11 +262,37 @@ async function loadBoroughOptions() {
 // -------------------------------
 
 function initMap() {
-    map = L.map("map").setView([40.7128, -74.0060], 11);
+    map = L.map("map", {
+        center: [40.7128, -74.0060],
+        zoom: 11,
+        dragging: false,      
+        scrollWheelZoom: true, 
+        doubleClickZoom: true,
+        touchZoom: true,
+        zoomControl: true
+    });
+
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
         attribution: "&copy; OpenStreetMap contributors"
     }).addTo(map);
+
+    const mapEl = document.getElementById("map");
+    const hint = document.querySelector(".map-drag-hint");
+
+    mapEl.addEventListener("click", () => {
+        map.dragging.enable();
+        mapEl.classList.add("map-active");
+        if (hint) hint.style.display = "none";
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!mapEl.contains(e.target)) {
+            map.dragging.disable();
+            mapEl.classList.remove("map-active");
+            if (hint) hint.style.display = "flex";
+        }
+    });
 }
 
 function zoneColor(count, max) {
@@ -303,13 +343,19 @@ async function loadMap() {
             layer.bindPopup(
                 `<strong>${name}</strong><br>Pickups: ${count.toLocaleString()}`
             );
+            layer.on("click", () => {
+                map.dragging.enable();
+                document.getElementById("map").classList.add("map-active");
+                const hint = document.querySelector(".map-drag-hint");
+                if (hint) hint.style.display = "none";
+            });
         }
     }).addTo(map);
 }
 
-// ------------------------------------------------------------
-// Connection status indicator (sidebar footer)
-// ------------------------------------------------------------
+// -------------------------------------
+// Connection status indicator
+// -------------------------------------
 
 async function checkHealth() {
     const dot = document.getElementById("dbStatus");
@@ -357,17 +403,6 @@ async function loadDashboard() {
         showBanner("Something went wrong loading the dashboard. Check the console.", true);
     }
 }
-
-// --------------------------------------
-// Sidebar nav; active-state toggle
-// --------------------------------------
-
-document.querySelectorAll(".sidebar li").forEach(li => {
-    li.addEventListener("click", () => {
-        document.querySelectorAll(".sidebar li").forEach(x => x.classList.remove("active"));
-        li.classList.add("active");
-    });
-});
 
 // -----------------------------
 // Filter button
