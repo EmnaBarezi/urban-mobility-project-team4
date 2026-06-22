@@ -367,3 +367,47 @@ canvas { width: 100% !important; max-height: 300px !important; }
     .filters { width: 100%; }
     .filters select, .filters input, .filters button { flex: 1; }
 }
+
+/* ------------Main-------------*/
+.main-content {
+    overflow-y: auto;
+    height: 100vh;
+}
+
+/* ----------Map dragging--------------*/
+.map-wrapper {
+    position: relative;
+}
+
+.map-drag-hint {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(11, 14, 20, 0.72);
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    pointer-events: none; 
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    backdrop-filter: blur(4px);
+    z-index: 500;
+    white-space: nowrap;
+}
+
+.map-drag-hint::before {
+    content: "✥"; 
+    font-size: 1rem;
+    color: var(--yellow);
+}
+
+#map.map-active + .map-drag-hint {
+    display: none;
+}
+#map                { cursor: default; }
+#map.map-active     { cursor: grab; }
+#map.map-active:active { cursor: grabbing; }
